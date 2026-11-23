@@ -1,0 +1,35 @@
+[project]
+name = "meeting-assistant"
+version = "0.1.0"
+description = "Local processing of call recordings: transcription, voices and meeting minutes"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "mlx-whisper==0.4.3",
+    "silero-vad==6.2.3",
+    "numpy>=2",
+    "soundfile>=0.13",
+    "fastapi>=0.162.5",
+    "uvicorn>=0.54.0",
+    "jinja2>=3.1.6",
+]
+
+[project.scripts]
+ma = "ma.cli:main"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=8",
+]
+
+[build-system]
+requires = ["uv_build>=0.13,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "ma"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: real models on synthetic speech from say (uv run pytest -m slow)"]
+addopts = "-m 'not slow'"

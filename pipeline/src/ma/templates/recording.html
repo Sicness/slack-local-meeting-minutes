@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ r.title or r.id }}{% endblock %}
+{% block main %}
+<p class="crumbs"><a href="/">{{ t('nav_recordings') }}</a> / {{ r.id }}</p>
+<h1>{{ r.title or t('meeting_on', date=r.date) }}</h1>
+<p class="meta">
+  {{ r.date }} · {{ r.duration }} · <span class="state {{ r.state_kind }}">{{ r.state }}</span>
+  {% if r.meeting_url %} · <a href="{{ r.meeting_url }}">{{ t('link_minutes_obsidian') }}</a>{% endif %}
+  {% if r.transcript_url %} · <a href="{{ r.transcript_url }}">{{ t('link_transcript') }}</a>{% endif %}
+</p>
+{% if r.error %}<p class="error">{{ r.failed }}: {{ r.error }}</p>{% endif %}
+
+<h2>{{ t('meeting_voices') }}</h2>
+{% if not voices %}
+<p class="muted">{{ t('no_voices') }}</p>
+{% endif %}
+{% if voices and not have_audio %}<p class="muted">{{ t('audio_gone', days=retention_days) }}</p>{% endif %}
+<div class="voices">
+{% for v in voices %}
+  <section class="voice" data-cluster="{{ v.cluster }}">
+    <div class="voice-head">
+      <h3>{{ v.name or v.label }}</h3>
+      <span class="muted small">{{ v.label }}{% if v.voice_id %} · {{ t('meetings_n', n=v.meetings) }}{% endif %} · {{ t('speech_t', t=v.speech) }} · {{ v.decision }}{% if v.similarity %} ({{ "%.2f" | format(v.similarity) }}){% endif %}</span>
+    </div>
+    {% if have_audio and v.clips %}
+    <div class="clips">
+      {% for c in v.clips %}
+      <button class="play" data-src="/r/{{ r.id }}/clip?start={{ c.start }}&end={{ c.end }}" title="{{ t('listen_at', t=c.at) }}">▶ {{ c.at }}</button>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if v.said %}
+    <ul class="said">{% for s in v.said %}<li>{{ s }}</li>{% endfor %}</ul>
+    {% endif %}
+    <div class="actions">
+      {% if v.voice_id %}
+      <form class="name-form" data-voice="{{ v.voice_id }}">
+        <label>{{ t('who') }} <input name="name" value="{{ v.name or '' }}" placeholder="{{ t('name_placeholder') }}" autocomplete="off"></label>
+        <button type="submit">{{ t('save') }}</button>
+      </form>
+      {% endif %}
+      <form class="reassign-form" data-rid="{{ r.id }}" data-cluster="{{ v.cluster }}">
+        <label>{{ t('other_voice') }}
+          <select name="voice_id">
+            <option value="">{{ t('choose') }}</option>
+            {% for o in options %}{% if o.id != v.voice_id %}<option value="{{ o.id }}">{{ o.label }}</option>{% endif %}{% endfor %}
+            <option value="new">{{ t('new_voice') }}</option>
+          </select>
+        </label>
+        <button type="submit">{{ t('move') }}</button>
+      </form>
+    </div>
+  </section>
+{% endfor %}
+</div>
+
+<h2>{{ t('processing') }}</h2>
+<div class="actions">
+  <button class="act" data-url="/api/r/{{ r.id }}/rerender">{{ t('rerender_notes') }}</button>
+  <form class="process-form" data-rid="{{ r.id }}">
+    <label>{{ t('restart_from') }}
+      <select name="from">
+        {% for s in steps %}<option value="{{ s }}" {% if s == (r.failed or "minutes") %}selected{% endif %}>{{ s }}</option>{% endfor %}
+      </select>
+    </label>
+    <button type="submit">{{ t('run') }}</button>
+  </form>
+  <button class="danger-act" data-url="/api/r/{{ r.id }}/delete" data-next="/" data-confirm="{{ t('delete_recording_confirm') }}">{{ t('delete_recording') }}</button>
+</div>
+<p class="muted small">{{ t('steps') }} {% for s, st in r.steps.items() %}{{ s }} — {{ st or "—" }}{% if not loop.last %}, {% endif %}{% endfor %}.
+{{ t('gpu_note') }}</p>
+{% endblock %}

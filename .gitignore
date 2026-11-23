@@ -1,0 +1,31 @@
+# Build
+.build/
+build/
+*.app/
+DerivedData/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Meeting data and voices: never commit
+*.caf
+*.wav
+*.m4a
+*.flac
+*.opus
+*.mp3
+*.sqlite
+*.sqlite3
+recordings/
+transcripts/
+
+# Local settings and secrets
+config.toml
+.env
+*.local.*
+
+# macOS
+.DS_Store

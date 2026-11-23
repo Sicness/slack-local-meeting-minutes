@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ t('nav_recordings') }}{% endblock %} — Meeting Assistant</title>
+<link rel="stylesheet" href="/static/app.css">
+<script id="strings" type="application/json">{{ browser_strings | tojson }}</script>
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/">Meeting Assistant</a>
+  <nav>
+    <a href="/" {% if page == "index" %}aria-current="page"{% endif %}>{{ t('nav_recordings') }}</a>
+    <a href="/voices" {% if page == "voices" %}aria-current="page"{% endif %}>{{ t('nav_voices') }}</a>
+  </nav>
+</header>
+<main>
+{% block main %}{% endblock %}
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

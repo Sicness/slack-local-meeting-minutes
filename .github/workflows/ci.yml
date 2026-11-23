@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pipeline:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install uv ffmpeg
+      - run: uv run --directory pipeline pytest
+
+  swift:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 26
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)"
+      - run: swift --version
+      - run: recorder/scripts/test.sh
+      - run: swift build -c release
+        working-directory: recorder
+      - run: swift build -c release
+        working-directory: diarizer
+
+  install-script:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash -n scripts/install.sh

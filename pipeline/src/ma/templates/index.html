@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_recordings') }}{% endblock %}
+{% block main %}
+<h1>{{ t('nav_recordings') }}</h1>
+{% if not rows %}
+<p class="muted">{{ t('no_recordings') }}</p>
+{% else %}
+<table class="list">
+  <thead><tr><th>{{ t('col_when') }}</th><th>{{ t('col_meeting') }}</th><th>{{ t('col_length') }}</th><th>{{ t('col_people') }}</th><th>{{ t('col_state') }}</th><th>Obsidian</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+  <tr>
+    <td class="nowrap">{{ r.date }}</td>
+    <td><a href="/r/{{ r.id }}">{{ r.title or r.id }}</a>{% if r.title %}<div class="muted small">{{ r.id }}</div>{% endif %}</td>
+    <td class="nowrap num">{{ r.duration }}</td>
+    <td>{{ r.people | join(", ") }}</td>
+    <td><span class="state {{ r.state_kind }}">{{ r.state }}</span></td>
+    <td class="nowrap">
+      {% if r.meeting_url %}<a href="{{ r.meeting_url }}">{{ t('link_minutes') }}</a>{% endif %}
+      {% if r.transcript_url %}{% if r.meeting_url %} · {% endif %}<a href="{{ r.transcript_url }}">{{ t('link_transcript') }}</a>{% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}
