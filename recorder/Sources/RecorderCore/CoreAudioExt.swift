@@ -13,8 +13,12 @@ public func fourCC(_ value: UInt32) -> String {
 }
 
 /// A readable Core Audio error code: fourCC if it is letters, otherwise a number.
+/// Read by reflection: the `AudioHardwareError.error` getter is missing from macOS 15's CoreAudio.
 public func describeStatus(_ error: Error) -> String {
-    if let e = error as? AudioHardwareError { return "OSStatus \(fourCC(UInt32(bitPattern: e.error))) (\(e.error))" }
+    if String(describing: type(of: error)) == "AudioHardwareError",
+       let code = Mirror(reflecting: error).children.first?.value as? Int32 {
+        return "OSStatus \(fourCC(UInt32(bitPattern: code))) (\(code))"
+    }
     return String(describing: error)
 }
 

@@ -18,17 +18,17 @@ A macOS menu bar app that records your Slack calls, transcribes them, tells spea
 ## How it works
 
 ```mermaid
-flowchart LR
-    Slack["Slack desktop app"] -->|"process audio"| Recorder
-    Mic["Microphone"] --> Recorder["MeetingRecorder<br/>menu bar app, Swift"]
-    Recorder -->|"mic.caf, remote.caf, meta.json"| Data[("~/MeetingAssistant")]
-    Recorder -->|"after the call"| Pipeline["ma process<br/>Python"]
-    Data <--> Pipeline
+flowchart TD
+    Slack["Slack desktop app"] -->|process audio| Recorder["MeetingRecorder<br/>menu bar app, Swift"]
+    Mic["Microphone"] --> Recorder
+    Recorder -->|two tracks| Data[("~/MeetingAssistant")]
+    Recorder -->|after the call| Pipeline["ma process<br/>Python"]
+    Pipeline <--> Data
+    UI["ma ui<br/>127.0.0.1:8765"] <--> Data
     Pipeline --> Whisper["Whisper<br/>MLX, GPU"]
     Pipeline --> Diarizer["ma-diarize<br/>FluidAudio, Core ML"]
     Pipeline --> Ollama["Ollama<br/>qwen3.5:9b"]
     Pipeline --> Vault[("Obsidian vault")]
-    UI["ma ui<br/>127.0.0.1:8765"] <--> Data
 ```
 
 The system has four parts that run separately:

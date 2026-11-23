@@ -18,17 +18,17 @@
 ## Как это устроено
 
 ```mermaid
-flowchart LR
-    Slack["Приложение Slack"] -->|"звук процесса"| Recorder
-    Mic["Микрофон"] --> Recorder["MeetingRecorder<br/>строка меню, Swift"]
-    Recorder -->|"mic.caf, remote.caf, meta.json"| Data[("~/MeetingAssistant")]
-    Recorder -->|"после звонка"| Pipeline["ma process<br/>Python"]
-    Data <--> Pipeline
+flowchart TD
+    Slack["Приложение Slack"] -->|звук процесса| Recorder["MeetingRecorder<br/>строка меню, Swift"]
+    Mic["Микрофон"] --> Recorder
+    Recorder -->|две дорожки| Data[("~/MeetingAssistant")]
+    Recorder -->|после звонка| Pipeline["ma process<br/>Python"]
+    Pipeline <--> Data
+    UI["ma ui<br/>127.0.0.1:8765"] <--> Data
     Pipeline --> Whisper["Whisper<br/>MLX, GPU"]
     Pipeline --> Diarizer["ma-diarize<br/>FluidAudio, Core ML"]
     Pipeline --> Ollama["Ollama<br/>qwen3.5:9b"]
     Pipeline --> Vault[("Хранилище Obsidian")]
-    UI["ma ui<br/>127.0.0.1:8765"] <--> Data
 ```
 
 Система состоит из четырёх частей, которые работают отдельно:

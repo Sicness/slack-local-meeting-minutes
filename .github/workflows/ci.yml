@@ -17,7 +17,11 @@ jobs:
       - run: uv run --directory pipeline pytest
 
   swift:
-    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-26]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode 26
@@ -26,8 +30,15 @@ jobs:
       - run: recorder/scripts/test.sh
       - run: swift build -c release
         working-directory: recorder
+      - name: Recorder loads on this macOS
+        run: recorder/.build/release/MeetingRecorder help
       - run: swift build -c release
         working-directory: diarizer
+      - name: Diarizer loads on this macOS
+        run: |
+          code=0
+          diarizer/.build/release/ma-diarize >/dev/null 2>&1 || code=$?
+          test "$code" -lt 128
 
   install-script:
     runs-on: ubuntu-latest
